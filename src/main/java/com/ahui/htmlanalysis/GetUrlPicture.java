@@ -10,6 +10,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.util.Arrays;
 import java.util.Scanner;
 
 /**
@@ -23,9 +24,9 @@ public class GetUrlPicture {
         Scanner scanner = new Scanner(System.in);
         System.out.print("请输入请求网址: ");
         String url =scanner.next();
-        System.out.println("!!!注意!!! 路径必须以/结尾");
-        System.out.print("请输入保存路径: ");
-        String folderPath = scanner.next();
+        /*System.out.println("!!!注意!!! 路径必须以/结尾");
+        System.out.print("请输入保存路径: ");*/
+        String folderPath = "/Users/ahui/Downloads/AsianSister/";
         downloadFile(url, folderPath);
     }
 
@@ -52,8 +53,10 @@ public class GetUrlPicture {
         //获取子标签内属性为dataurl的值
         for (Element element : allElements) {
             if(!"".equals(element.attr("data-src")) && !" ".equals(element.attr("data-src"))){
+                //去除略缩图的_t
+                String removeThumbnail = element.attr("data-src").replace("_t.jpg",".jpg");
                 //拼接
-                String url = StrUtil.format("https://asiansister.com/{}", element.attr("data-src"));
+                String url = StrUtil.format("https://asiansister.com/{}", removeThumbnail);
                 //文件下载
                 HttpUtil.downloadFile(url, FileUtil.file(splicingUrl), 10000, new StreamProgress() {
                     @Override
