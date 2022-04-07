@@ -26,9 +26,9 @@ public class GetUrlPicture {
         Scanner scanner = new Scanner(System.in);
         System.out.print("请输入请求网址: ");
         String url =scanner.next();
-        /*System.out.println("!!!注意!!! 路径必须以/结尾");
-        System.out.print("请输入保存路径: ");*/
-        String folderPath = "/Users/ahui/Downloads/AsianSister/";
+        System.out.println("!!!注意!!! 路径必须以/结尾");
+        System.out.print("请输入保存路径: ");
+        String folderPath = scanner.next();
         downloadImage(url, folderPath);
     }
 
