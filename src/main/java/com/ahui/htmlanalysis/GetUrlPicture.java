@@ -4,13 +4,14 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.StreamProgress;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpException;
 import cn.hutool.http.HttpUtil;
+import lombok.SneakyThrows;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.util.Arrays;
 import java.util.Scanner;
 
 /**
@@ -21,25 +22,26 @@ import java.util.Scanner;
 public class GetUrlPicture {
 
     public static void main(String[] args) {
+        // 未下载 https://asiansister.com/view_1108__Patron__Fantasy_Factory__34Pn
         Scanner scanner = new Scanner(System.in);
         System.out.print("请输入请求网址: ");
         String url =scanner.next();
         /*System.out.println("!!!注意!!! 路径必须以/结尾");
         System.out.print("请输入保存路径: ");*/
         String folderPath = "/Users/ahui/Downloads/AsianSister/";
-        downloadFile(url, folderPath);
+        downloadImage(url, folderPath);
     }
 
+
     /**
-     * 下载文件
-     * @param requestUrl HTML页面的请求路径
+     * 下载图片
+     * @param requestUrl 套图主页面的请求路径
      * @param writeFolderPath 要写入的文件夹路径 路径格式一定要以/结尾传入
      */
-    public static void downloadFile(String requestUrl, String writeFolderPath) {
-        //发起请求获取网站内容
-        String requestUrlString = HttpUtil.get(requestUrl);
-        //解析HTML
-        Document document = Jsoup.parse(requestUrlString);
+    @SneakyThrows
+    public static void downloadImage(String requestUrl, String writeFolderPath) {
+        //发起请求获取网站内容并解析HTML
+        Document document = Jsoup.connect(requestUrl).get();
         //获取套图标题用来创建文件夹
         String title = document.title();
         //通过获取<div class="rootContant">的第二个元素来获取他的子标签
@@ -58,24 +60,27 @@ public class GetUrlPicture {
                 //拼接
                 String url = StrUtil.format("https://asiansister.com/{}", removeThumbnail);
                 //文件下载
-                HttpUtil.downloadFile(url, FileUtil.file(splicingUrl), 10000, new StreamProgress() {
-                    @Override
-                    public void start() {
-                        Console.log("开始下载...");
-                    }
-
-                    @Override
-                    public void progress(long progressSize) {
-                        Console.log("已下载：{}", FileUtil.readableFileSize(progressSize));
-                    }
-
-                    @Override
-                    public void finish() {
-                        Console.log("下载结束...");
-                    }
-                });
+                try {
+                    HttpUtil.downloadFile(url, FileUtil.file(splicingUrl), new StreamProgress() {
+                        @Override
+                        public void start() {
+                            Console.log("开始下载...");
+                        }
+                        @Override
+                        public void progress(long progressSize) {
+                            Console.log("已下载：{}", FileUtil.readableFileSize(progressSize));
+                        }
+                        @Override
+                        public void finish() {
+                            Console.log("下载结束...");
+                        }
+                    });
+                }catch (HttpException httpException){
+                    removeThumbnail = element.attr("data-src").replace("_t.jpg",".png");
+                    url = StrUtil.format("https://asiansister.com/{}", removeThumbnail);
+                    HttpUtil.downloadFile(url, FileUtil.file(splicingUrl));
+                }
             }
         }
     }
-
 }
